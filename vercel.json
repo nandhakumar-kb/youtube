@@ -1,9 +1,10 @@
 {
   "buildCommand": "cd client && npm install && npm run build",
   "outputDirectory": "client/dist",
+  "framework": null,
   "functions": {
     "api/index.js": {
-      "runtime": "@vercel/node@3.0.0"
+      "runtime": "nodejs20.x"
     }
   },
   "rewrites": [
