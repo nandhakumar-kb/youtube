@@ -1,40 +1,28 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 8000;
 
 // Middleware
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://mystoryaugust.vercel.app', 'https://youtube-5hdivb3vq-nandha-kumar.vercel.app'],
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
-// Email Transporter
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
-
-// Verify transporter connection
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log('SMTP Connection Error:', error);
-    } else {
-        console.log('SMTP Server is ready to take our messages');
-    }
+// Health check
+app.get('/api', (req, res) => {
+    res.json({ status: 'API is running' });
 });
 
 // Routes
 app.post('/api/newsletter', async (req, res) => {
+    console.log('Newsletter endpoint hit');
+    console.log('Environment check:', {
+        hasHost: !!process.env.SMTP_HOST,
+        hasPort: !!process.env.SMTP_PORT,
+        hasUser: !!process.env.SMTP_USER,
+        hasPass: !!process.env.SMTP_PASS
+    });
+
     const { email } = req.body;
 
     if (!email) {
@@ -42,7 +30,18 @@ app.post('/api/newsletter', async (req, res) => {
     }
 
     try {
-        // 1. Send "Thanks for Subscribing" email to the user
+        // Create transporter on demand
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: parseInt(process.env.SMTP_PORT || '587'),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
+        });
+
+        // Send email
         const mailOptions = {
             from: process.env.FROM_EMAIL || process.env.SMTP_USER,
             to: email,
@@ -73,10 +72,3 @@ app.post('/api/newsletter', async (req, res) => {
 
 // Export the app for Vercel
 module.exports = app;
-
-// Only listen if run directly (local dev)
-if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-    });
-}
