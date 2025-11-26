@@ -1,75 +1,31 @@
-// Newsletter Service - Mailchimp/ConvertKit Integration
-const NEWSLETTER_API_ENDPOINT = import.meta.env.VITE_NEWSLETTER_API_KEY 
-  ? '/api/newsletter' 
-  : null
+// Newsletter Service - Custom Backend Integration
+// Newsletter Service - Custom Backend Integration
+const API_URL = ''; // Use relative path for proxy
 
 export const subscribeToNewsletter = async (email) => {
+  console.log('Attempting to subscribe with API_URL:', API_URL);
   try {
-    // If no API key configured, simulate success for development
-    if (!NEWSLETTER_API_ENDPOINT) {
-      console.log('Newsletter subscription (dev mode):', email)
-      return { success: true, message: 'Thanks for subscribing!' }
-    }
-
-    // For Mailchimp
-    const response = await fetch(NEWSLETTER_API_ENDPOINT, {
+    const response = await fetch(`${API_URL}/api/newsletter`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ 
-        email,
-        listId: import.meta.env.VITE_NEWSLETTER_LIST_ID 
-      }),
-    })
+      body: JSON.stringify({ email }),
+    });
+
+    console.log('Response status:', response.status);
+    const data = await response.json();
 
     if (!response.ok) {
-      throw new Error('Subscription failed')
+      throw new Error(data.message || 'Subscription failed');
     }
 
-    const data = await response.json()
-    return { success: true, message: 'Thanks for subscribing! Check your inbox.' }
+    return { success: true, message: data.message };
   } catch (error) {
-    console.error('Newsletter subscription error:', error)
-    return { 
-      success: false, 
-      message: 'Something went wrong. Please try again later.' 
-    }
+    console.error('Newsletter subscription error details:', error);
+    return {
+      success: false,
+      message: error.message || 'Something went wrong. Please try again later.'
+    };
   }
-}
-
-// Alternative: ConvertKit Integration
-export const subscribeToConvertKit = async (email) => {
-  const CONVERTKIT_API_KEY = import.meta.env.VITE_NEWSLETTER_API_KEY
-  const FORM_ID = import.meta.env.VITE_NEWSLETTER_LIST_ID
-
-  if (!CONVERTKIT_API_KEY) {
-    console.log('ConvertKit subscription (dev mode):', email)
-    return { success: true, message: 'Thanks for subscribing!' }
-  }
-
-  try {
-    const response = await fetch(`https://api.convertkit.com/v3/forms/${FORM_ID}/subscribe`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        api_key: CONVERTKIT_API_KEY,
-        email: email,
-      }),
-    })
-
-    if (!response.ok) {
-      throw new Error('Subscription failed')
-    }
-
-    return { success: true, message: 'Thanks for subscribing! Check your inbox.' }
-  } catch (error) {
-    console.error('ConvertKit subscription error:', error)
-    return { 
-      success: false, 
-      message: 'Something went wrong. Please try again later.' 
-    }
-  }
-}
+};
