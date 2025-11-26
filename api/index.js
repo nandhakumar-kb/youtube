@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://mystoryaugust.vercel.app', 'https://youtube-5hdivb3vq-nandha-kumar.vercel.app'],
     credentials: true
 }));
 app.use(express.json());
@@ -71,15 +71,12 @@ app.post('/api/newsletter', async (req, res) => {
     }
 });
 
-// // Export the app for Vercel
-// module.exports = app;
+// Export the app for Vercel
+module.exports = app;
 
-// // Only listen if run directly (local dev)
-// if (require.main === module) {
-//     app.listen(PORT, () => {
-//         console.log(`Server is running on port ${PORT}`);
-//     });
-// }
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// Only listen if run directly (local dev)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}

@@ -1,6 +1,5 @@
 // Newsletter Service - Custom Backend Integration
-// Newsletter Service - Custom Backend Integration
-const API_URL = ''; // Use relative path for proxy
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 export const subscribeToNewsletter = async (email) => {
   console.log('Attempting to subscribe with API_URL:', API_URL);
